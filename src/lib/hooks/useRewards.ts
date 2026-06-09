@@ -1,14 +1,4 @@
-/**
- * useRewards
- *
- * Manages the full reward claim flow:
- *   1. Fetch pending rewards from the backend API
- *   2. Read on-chain token balance via the contract adapter
- *   3. Submit claim transaction
- *   4. Wait for confirmation
- *   5. Notify backend of confirmed result
- *   6. Refresh state
- */
+/** Fetches reward and balance data, and handles the claim transaction flow. */
 
 import { useState, useCallback, useEffect } from 'react'
 import { fetchUserBalance, fetchUserRewards, postClaimReward } from '@/lib/api/rewardsApi'
@@ -70,16 +60,12 @@ export function useRewards(address: string | undefined) {
       setState((s) => ({ ...s, txStatus: 'pending', txHash: null, errorMessage: null }))
 
       try {
-        // Step 1: Submit the transaction — returns a hash immediately.
-        // The transaction has not yet been confirmed on-chain at this point.
         const txHash = await submitClaimTransaction(address, reward.id)
         setState((s) => ({ ...s, txHash }))
 
-        // Step 2: Notify the backend and mark the UI as confirmed.
         await postClaimReward({ address, rewardId: reward.id, txHash })
         setState((s) => ({ ...s, txStatus: 'confirmed' }))
 
-        // Step 3: Wait for the actual on-chain result.
         const confirmationResult = await waitForConfirmation(txHash)
         if (confirmationResult === 'failed') {
           setState((s) => ({
@@ -90,7 +76,6 @@ export function useRewards(address: string | undefined) {
           return
         }
 
-        // Step 4: Refresh balances and reward data.
         await refresh()
       } catch (err) {
         setState((s) => ({

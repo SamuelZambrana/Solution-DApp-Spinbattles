@@ -17,6 +17,8 @@ Open [http://localhost:3000](http://localhost:3000)
 
 > The app works out of the box with MetaMask and other browser-injected wallets. No account registration or wallet funds are required.
 
+> Some dependency warnings may appear during installation. They do not affect the assessment if the app installs and starts successfully. Please do not run `npm audit fix --force`, as it may change project dependencies.
+
 ---
 
 ## Your Goal
@@ -45,10 +47,22 @@ Complete and verify the reward claim flow. Most of the wiring is already in plac
   - Your architecture and integration approach.
   - What the bug was and how you fixed it.
 
-> **Hint:** the bug is in the claim flow. Look at when the backend is notified relative to when the transaction confirmation result is received.
+> **Hint:** the bug is in the claim flow. It is related to claim status and transaction state handling.
 
 ---
 
+## Submission
+
+Work in your own fork or local copy. You do not need write access to the SpinBattles repository.
+
+Please submit your completed assessment by replying to the email from the SpinBattles tech team with either:
+
+- a GitHub repository link, or
+- a ZIP file of your completed project
+
+Please include a short note explaining what you changed and how you fixed the bug.
+
+---
 
 ## Project Structure
 
