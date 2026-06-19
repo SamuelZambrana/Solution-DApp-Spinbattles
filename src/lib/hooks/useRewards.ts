@@ -62,12 +62,12 @@ export function useRewards(address: string | undefined) {
       setState((s) => ({ ...s, txStatus: 'pending', txHash: null, errorMessage: null }))
 
       try {
+        // 1. Submit the claim transaction (stays 'pending' while it's in flight).
         const txHash = await submitClaimTransaction(address, reward.id)
         setState((s) => ({ ...s, txHash }))
 
-        await postClaimReward({ address, rewardId: reward.id, txHash })
-        setState((s) => ({ ...s, txStatus: 'confirmed' }))
-
+        // 2. Wait for the on-chain result BEFORE touching the backend, so the
+        //    backend is never updated for a transaction that ends up reverting.
         const confirmationResult = await waitForConfirmation(txHash)
         if (confirmationResult === 'failed') {
           setState((s) => ({
@@ -78,6 +78,11 @@ export function useRewards(address: string | undefined) {
           return
         }
 
+        // 3. Only once confirmed on-chain, update the backend reward status.
+        await postClaimReward({ address, rewardId: reward.id, txHash })
+        setState((s) => ({ ...s, txStatus: 'confirmed' }))
+
+        // 4. Refresh the UI so it reflects the updated backend reward status.
         await refresh()
       } catch (err) {
         setState((s) => ({
