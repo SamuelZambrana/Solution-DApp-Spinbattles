@@ -14,6 +14,7 @@ export function RewardPanel() {
     txStatus,
     txHash,
     errorMessage,
+    loadError,
     isLoading,
     claim,
     refresh,
@@ -24,12 +25,32 @@ export function RewardPanel() {
 
   return (
     <div className="space-y-4">
+      {/* Data load error */}
+      {loadError && (
+        <div className="border border-red-900 rounded-lg p-4 bg-red-950/40">
+          <p className="text-xs text-red-400 uppercase tracking-wide mb-1">Failed to load data</p>
+          <p className="text-sm text-red-300">{loadError}</p>
+          <button
+            onClick={refresh}
+            disabled={isLoading}
+            className="mt-2 text-xs text-red-300 hover:text-red-200 underline disabled:opacity-40"
+          >
+            {isLoading ? 'Retrying...' : 'Retry'}
+          </button>
+        </div>
+      )}
+
       {/* Off-chain balance */}
       <div className="border border-gray-800 rounded-lg p-4 bg-gray-900">
         <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Off-chain Balance</p>
         <p className="text-lg font-semibold text-white">
           {loading ? '—' : balance ? `${balance.offChainBalance} ${balance.token}` : '—'}
         </p>
+        {balance && (
+          <p className="text-xs text-gray-600 mt-1">
+            Updated: {new Date(balance.updatedAt).toLocaleTimeString()}
+          </p>
+        )}
       </div>
 
       {/* On-chain token balance */}

@@ -16,6 +16,7 @@ interface RewardsState {
   txStatus: TxStatus
   txHash: string | null
   errorMessage: string | null
+  loadError: string | null
   isLoading: boolean
 }
 
@@ -27,12 +28,13 @@ export function useRewards(address: string | undefined) {
     txStatus: 'idle',
     txHash: null,
     errorMessage: null,
+    loadError: null,
     isLoading: false,
   })
 
   const refresh = useCallback(async () => {
     if (!address) return
-    setState((s) => ({ ...s, isLoading: true, errorMessage: null }))
+    setState((s) => ({ ...s, isLoading: true, loadError: null }))
     try {
       const [balance, rewards, onChainBalance] = await Promise.all([
         fetchUserBalance(address),
@@ -44,7 +46,7 @@ export function useRewards(address: string | undefined) {
       setState((s) => ({
         ...s,
         isLoading: false,
-        errorMessage: err instanceof Error ? err.message : 'Failed to load data',
+        loadError: err instanceof Error ? err.message : 'Failed to load data',
       }))
     }
   }, [address])
