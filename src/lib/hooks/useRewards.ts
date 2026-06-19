@@ -1,6 +1,6 @@
 /** Fetches reward and balance data, and handles the claim transaction flow. */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { fetchUserBalance, fetchUserRewards, postClaimReward } from '@/lib/api/rewardsApi'
 import {
   readTokenBalance,
@@ -51,13 +51,24 @@ export function useRewards(address: string | undefined) {
     }
   }, [address])
 
+  // Reset any leftover transaction state when the connected address changes,
+  // so a previous account's pending/confirmed/failed status never leaks into
+  // a different account. (refresh identity only changes when address changes.)
   useEffect(() => {
+    setState((s) => ({ ...s, txStatus: 'idle', txHash: null, errorMessage: null }))
     refresh()
   }, [refresh])
+
+  // Guards against concurrent claims (the button is disabled while pending,
+  // but this keeps the transaction lifecycle correct even if claim() is
+  // triggered twice in quick succession).
+  const isClaimingRef = useRef(false)
 
   const claim = useCallback(
     async (reward: Reward) => {
       if (!address) return
+      if (isClaimingRef.current) return
+      isClaimingRef.current = true
 
       setState((s) => ({ ...s, txStatus: 'pending', txHash: null, errorMessage: null }))
 
@@ -90,6 +101,8 @@ export function useRewards(address: string | undefined) {
           txStatus: 'failed',
           errorMessage: err instanceof Error ? err.message : 'Claim failed',
         }))
+      } finally {
+        isClaimingRef.current = false
       }
     },
     [address, refresh]
