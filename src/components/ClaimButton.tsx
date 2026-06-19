@@ -12,6 +12,14 @@ export function ClaimButton({ reward, txStatus, onClaim }: Props) {
   const isPending = txStatus === 'pending'
   const canClaim = reward?.status === 'pending' && !isPending
 
+  const label = isPending
+    ? 'Claiming...'
+    : !reward
+    ? 'No reward to claim'
+    : reward.status === 'claimed'
+    ? 'Already Claimed'
+    : 'Claim Reward'
+
   return (
     <button
       onClick={() => reward && onClaim(reward)}
@@ -24,11 +32,7 @@ export function ClaimButton({ reward, txStatus, onClaim }: Props) {
         }
       `}
     >
-      {isPending
-        ? 'Claiming...'
-        : reward?.status === 'claimed'
-        ? 'Already Claimed'
-        : 'Claim Reward'}
+      {label}
     </button>
   )
 }
